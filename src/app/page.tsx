@@ -8,6 +8,28 @@ interface AnalysisResult {
   governance: string;
   score: number;
   summary: string;
+  sentiment: {
+    environmental: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    social: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    governance: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    overall: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+  };
 }
 
 export default function Home() {
@@ -59,7 +81,7 @@ export default function Home() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com/esg"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 !text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
@@ -81,22 +103,61 @@ export default function Home() {
 
         {analysis && (
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold mb-4">Analysis Results</h2>
+            <h2 className="text-2xl text-black-700 font-semibold mb-4">Analysis Results</h2>
             
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-medium mb-2">Environmental Factors</h3>
-                <p className="text-gray-700">{analysis.environmental}</p>
+                <h3 className="text-xl text-black-700 font-medium mb-2">Environmental Factors</h3>
+                <p className="text-black-700">{analysis.environmental}</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">Sentiment Analysis:</p>
+                  <p className="text-sm">
+                    Sentiment: <span className={`font-semibold ${
+                      analysis.sentiment.environmental.sentiment === 'positive' ? 'text-green-600' :
+                      analysis.sentiment.environmental.sentiment === 'negative' ? 'text-red-600' : 'text-yellow-600'
+                    }`}>{analysis.sentiment.environmental.sentiment}</span>
+                    {' | '}
+                    Confidence: {(analysis.sentiment.environmental.confidence * 100).toFixed(1)}%
+                    {' | '}
+                    Score: {(analysis.sentiment.environmental.score * 100).toFixed(1)}%
+                  </p>
+                </div>
               </div>
               
               <div>
                 <h3 className="text-xl font-medium mb-2">Social Factors</h3>
-                <p className="text-gray-700">{analysis.social}</p>
+                <p className="text-black-700">{analysis.social}</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">Sentiment Analysis:</p>
+                  <p className="text-sm">
+                    Sentiment: <span className={`font-semibold ${
+                      analysis.sentiment.social.sentiment === 'positive' ? 'text-green-600' :
+                      analysis.sentiment.social.sentiment === 'negative' ? 'text-red-600' : 'text-yellow-600'
+                    }`}>{analysis.sentiment.social.sentiment}</span>
+                    {' | '}
+                    Confidence: {(analysis.sentiment.social.confidence * 100).toFixed(1)}%
+                    {' | '}
+                    Score: {(analysis.sentiment.social.score * 100).toFixed(1)}%
+                  </p>
+                </div>
               </div>
               
               <div>
                 <h3 className="text-xl font-medium mb-2">Governance Factors</h3>
-                <p className="text-gray-700">{analysis.governance}</p>
+                <p className="text-black-700">{analysis.governance}</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">Sentiment Analysis:</p>
+                  <p className="text-sm">
+                    Sentiment: <span className={`font-semibold ${
+                      analysis.sentiment.governance.sentiment === 'positive' ? 'text-green-600' :
+                      analysis.sentiment.governance.sentiment === 'negative' ? 'text-red-600' : 'text-yellow-600'
+                    }`}>{analysis.sentiment.governance.sentiment}</span>
+                    {' | '}
+                    Confidence: {(analysis.sentiment.governance.confidence * 100).toFixed(1)}%
+                    {' | '}
+                    Score: {(analysis.sentiment.governance.score * 100).toFixed(1)}%
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -107,7 +168,32 @@ export default function Home() {
                       {analysis.score}
                     </span>
                   </div>
-                  <p className="ml-4 text-gray-600">{analysis.summary}</p>
+                  <p className="ml-4 text-black">{analysis.summary}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-medium mb-2">Overall Sentiment Analysis</h3>
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-semibold">Overall Sentiment:</span>
+                    <span className={`px-3 py-1 rounded-full text-white font-medium ${
+                      analysis.sentiment.overall.sentiment === 'positive' ? 'bg-green-500' :
+                      analysis.sentiment.overall.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`}>
+                      {analysis.sentiment.overall.sentiment.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Confidence:</span>
+                      <span className="ml-2">{(analysis.sentiment.overall.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Sentiment Score:</span>
+                      <span className="ml-2">{(analysis.sentiment.overall.score * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

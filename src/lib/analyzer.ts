@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import natural from 'natural';
+import { SentimentAnalyzer } from './sentiment-analyzer';
 
 const TfIdf = natural.TfIdf;
 
@@ -29,6 +30,28 @@ interface AnalysisResult {
   governance: string;
   score: number;
   summary: string;
+  sentiment: {
+    environmental: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    social: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    governance: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+    overall: {
+      score: number;
+      sentiment: 'positive' | 'negative' | 'neutral';
+      confidence: number;
+    };
+  };
 }
 
 function calculateScore(content: string, category: keyof typeof keywords): number {
@@ -81,13 +104,29 @@ export async function analyze(url: string): Promise<AnalysisResult> {
     const overallScore = Math.round(
       (environmentalScore + socialScore + governanceScore) / 3
     );
+
+    // Initialize sentiment analyzer
+    const sentimentAnalyzer = new SentimentAnalyzer();
+    
+    // Extract ESG-specific content for sentiment analysis
+    const environmentalContent = extractESGContent(content, 'environmental');
+    const socialContent = extractESGContent(content, 'social');
+    const governanceContent = extractESGContent(content, 'governance');
+    
+    // Perform sentiment analysis
+    const sentimentResults = await sentimentAnalyzer.analyzeESGSentiment(
+      environmentalContent,
+      socialContent,
+      governanceContent
+    );
     
     return {
       environmental: `Score: ${environmentalScore}/100 - ${generateCategorySummary('environmental', environmentalScore)}`,
       social: `Score: ${socialScore}/100 - ${generateCategorySummary('social', socialScore)}`,
       governance: `Score: ${governanceScore}/100 - ${generateCategorySummary('governance', governanceScore)}`,
       score: overallScore,
-      summary: generateSummary(scores)
+      summary: generateSummary(scores),
+      sentiment: sentimentResults
     };
   } catch (error) {
     console.error('Error analyzing URL:', error);
@@ -105,4 +144,16 @@ function generateCategorySummary(category: string, score: number): string {
   } else {
     return `Limited ${category} disclosure and practices identified.`;
   }
+}
+
+function extractESGContent(content: string, category: keyof typeof keywords): string {
+  const categoryKeywords = keywords[category];
+  const sentences = content.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  
+  const relevantSentences = sentences.filter(sentence => {
+    const lowerSentence = sentence.toLowerCase();
+    return categoryKeywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
+  });
+  
+  return relevantSentences.join('. ').substring(0, 1000); // Limit to 1000 characters
 } 
