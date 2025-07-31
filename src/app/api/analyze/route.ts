@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server';
 import { analyze } from '@/lib/analyzer';
+import { TensorFlowSentimentAnalyzer } from '@/lib/tensorflow-sentiment-analyzer';
 
 export async function POST(request: Request) {
   try {
-    const { url } = await request.json();
+    const body = await request.json();
+    
+    // Handle sentiment test requests
+    if (body.testSentiment && body.text) {
+      const sentimentAnalyzer = TensorFlowSentimentAnalyzer.getInstance();
+      await sentimentAnalyzer.loadPretrainedModel();
+      
+      const result = await sentimentAnalyzer.analyzeSentiment(body.text);
+      return NextResponse.json(result);
+    }
+    
+    // Handle regular URL analysis
+    const { url } = body;
     
     if (!url) {
       return NextResponse.json(

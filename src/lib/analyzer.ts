@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import natural from 'natural';
-import { SentimentAnalyzer } from './sentiment-analyzer';
+import { TensorFlowSentimentAnalyzer } from './tensorflow-sentiment-analyzer';
 
 const TfIdf = natural.TfIdf;
 
@@ -105,8 +105,11 @@ export async function analyze(url: string): Promise<AnalysisResult> {
       (environmentalScore + socialScore + governanceScore) / 3
     );
 
-    // Initialize sentiment analyzer
-    const sentimentAnalyzer = new SentimentAnalyzer();
+    // Initialize TensorFlow sentiment analyzer
+    const sentimentAnalyzer = TensorFlowSentimentAnalyzer.getInstance();
+    
+    // Load pre-trained model (this will train with sample data if no pre-trained model is available)
+    await sentimentAnalyzer.loadPretrainedModel();
     
     // Extract ESG-specific content for sentiment analysis
     const environmentalContent = extractESGContent(content, 'environmental');
