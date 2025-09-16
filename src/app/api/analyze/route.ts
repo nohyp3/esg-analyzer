@@ -14,19 +14,19 @@ export async function POST(request: Request) {
       const result = await sentimentAnalyzer.analyzeSentiment(body.text);
       return NextResponse.json(result);
     }
-    
-    // Handle regular URL analysis
-    const { url } = body;
-    
-    if (!url) {
-      return NextResponse.json(
-        { error: 'URL is required' },
-        { status: 400 }
-      );
+
+    // Handle regular ESG analysis requests
+    if (body.content) {
+      const result = await analyze(body.content);
+      return NextResponse.json(result);
     }
 
-    const result = await analyze(url);
-    return NextResponse.json(result);
+    // If no valid request body is provided
+    return NextResponse.json(
+      { error: 'Invalid request. Please provide either testSentiment with text or content for ESG analysis.' },
+      { status: 400 }
+    );
+
   } catch (error) {
     console.error('Error in API route:', error);
     return NextResponse.json(
